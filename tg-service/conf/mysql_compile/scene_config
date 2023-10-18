@@ -1,0 +1,13 @@
+CREATE TABLE `scene_config` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(50) NOT NULL,
+  `app_id` int(11) NOT NULL DEFAULT 0,
+  `bucket_type` int(11) NOT NULL DEFAULT 0,
+  `create_time` datetime NOT NULL DEFAULT '1971-01-01 08:00:00',
+  `update_time` datetime NOT NULL DEFAULT '1971-01-01 08:00:00',
+  `operator` varchar(20) NOT NULL,
+  `flow_type` int(4) NOT NULL DEFAULT 0,
+  `name_zh` varchar(8192) NOT NULL,
+  `exp_name` varchar(128) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -1,0 +1,19 @@
+CREATE TABLE `workflow` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `dimension_id` int(11) NOT NULL DEFAULT -1,
+  `experiment_id` bigint(20) NOT NULL DEFAULT 0,
+  `modules` varchar(8192) NOT NULL,
+  `flow_chart` varchar(10240) NOT NULL,
+  `is_default` int(11) NOT NULL DEFAULT 0,
+  `status` int(11) NOT NULL DEFAULT 1,
+  `range1` varchar(300) NOT NULL DEFAULT '0,1',
+  `range2` varchar(300) NOT NULL DEFAULT '[0-1]',
+  `remark` text NOT NULL,
+  `create_time` datetime NOT NULL DEFAULT '2018-09-20 10:00:00',
+  `update_time` datetime NOT NULL DEFAULT '2018-09-20 10:00:00',
+  `operator` varchar(50) NOT NULL DEFAULT 'admin',
+  `manual_slot_ids` varchar(200) NOT NULL,
+  `group_name` varchar(100) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `experiment_id` (`experiment_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

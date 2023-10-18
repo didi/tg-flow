@@ -1,0 +1,11 @@
+vendor/
+.idea/
+output/
+*.swp
+rebuild.sh
+.deploy/
+.statsd/
+.gitignore
+tg-flow
+log/
+app.conf

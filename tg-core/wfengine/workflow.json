@@ -1,0 +1,127 @@
+{
+  "actions": {
+    "action_1": {
+      "action_type": "task",
+      "action_id": "action_1",
+      "action_name": "dataprepare.DataPrepareSamp1",
+      "next_action_ids": [
+        "action_11"
+      ],
+      "description": ""
+    },
+    "action_11": {
+      "action_type": "condition",
+      "action_id": "action_11",
+      "action_name": "EQ",
+      "params": [
+        {
+          "name": "Version1",
+          "value": "$version",
+          "type": "string"
+        },
+        {
+          "name": "Version2",
+          "value": "6.0",
+          "type": "string"
+        }
+
+      ],
+      "next_action_ids": [
+        "action_2",
+        "action_3"
+      ],
+      "next_conditions": [
+        "Y",
+        "N"
+      ],
+      "description": ""
+    },
+    "action_2": {
+      "action_type": "task",
+      "action_id": "action_2",
+      "action_name": "recall.RecallSamp1",
+      "next_action_ids": [
+        "action_4",
+        "action_5"
+      ],
+      "description": ""
+    },
+    "action_3": {
+      "action_type": "task",
+      "action_id": "action_3",
+      "action_name": "recall.RecallSamp2",
+      "next_action_ids": [
+        "action_6"
+      ],
+      "description": ""
+    },
+    "action_4": {
+      "action_type": "task",
+      "action_id": "action_4",
+      "action_name": "recall.RecallSamp3",
+      "next_action_ids": [
+        "action_8"
+      ],
+      "description": ""
+    },
+    "action_5": {
+      "action_type": "task",
+      "action_id": "action_5",
+      "action_name": "recall.RecallSamp4",
+      "next_action_ids": [
+        "action_8"
+      ],
+      "description": ""
+    },
+    "action_6": {
+      "action_type": "task",
+      "action_id": "action_6",
+      "action_name": "recall.RecallSamp5",
+      "next_action_ids": [
+        "action_7"
+      ],
+      "description": ""
+    },
+    "action_7": {
+      "action_type": "task",
+      "action_id": "action_7",
+      "action_name": "recall.RecallSamp6",
+      "next_action_ids": [
+        "action_8"
+      ],
+      "description": ""
+    },
+    "action_8": {
+      "action_type": "task",
+      "action_id": "action_8",
+      "action_name": "filter.MultiFilter",
+      "params": [
+        {
+          "name": "FilterNames",
+          "value": "poi_id",
+          "type": "string"
+        }
+      ],
+      "next_action_ids": [
+        "action_9"
+      ],
+      "description": ""
+    },
+    "action_9": {
+      "action_type": "task",
+      "action_id": "action_9",
+      "action_name": "rank.RankSamp1",
+      "next_action_ids": [
+        "action_10"
+      ],
+      "description": ""
+    },
+    "action_10": {
+      "action_type": "task",
+      "action_id": "action_10",
+      "action_name": "postrank.PostRankSamp1",
+      "next_action_ids": [],
+      "description": ""
+    }
+  }
+}

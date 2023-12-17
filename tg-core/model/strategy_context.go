@@ -22,7 +22,6 @@ type ModuleResultInfo struct {
 	Id           string
 	StrategyName string
 	CostTime     int64
-	ResultInfo   interface{}
 }
 
 type StrategyContext struct {
@@ -65,7 +64,7 @@ func NewStrategyContext(ctx context.Context) *StrategyContext {
 }
 
 func (this *StrategyContext) Set(key string, value interface{}) {
-	this.ContextMap.Store(key,value)
+	this.ContextMap.Store(key, value)
 }
 
 func (this *StrategyContext) SetDebug(actionName string, key string, value interface{}) {
@@ -126,7 +125,7 @@ func (this *StrategyContext) AddTimeoutAction(actionName string) {
 
 func (this *StrategyContext) GetTimeoutActions() []string {
 	itf, err := this.GetArray(KEY_TIMEOUT_ACTION)
-	if err != nil || len(itf)==0 {
+	if err != nil || len(itf) == 0 {
 		return nil
 	}
 
@@ -137,12 +136,11 @@ func (this *StrategyContext) GetTimeoutActions() []string {
 	return actionNames
 }
 
-func (this *StrategyContext) SetModuleResult(actionId, actionName string, costTime int64, resultInfo interface{}) {
+func (this *StrategyContext) SetModuleResult(actionId, actionName string, costTime int64) {
 	mri := &ModuleResultInfo{
 		Id:           actionId,
 		StrategyName: actionName,
 		CostTime:     costTime,
-		ResultInfo:   resultInfo,
 	}
 
 	this.moduleResultMap.Store(actionId, mri)

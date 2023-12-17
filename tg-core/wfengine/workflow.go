@@ -1,8 +1,9 @@
-/**
-	Description : workflow v3.0 with branch
-	Author		: dayunzhangyunfeng@didiglobal.com
-	Date		: 2021-05-14
- */
+/*
+*
+Description : workflow v3.0 with branch
+Author		: dayunzhangyunfeng@didiglobal.com
+Date		: 2021-05-14
+*/
 package wfengine
 
 import (
@@ -18,56 +19,56 @@ import (
 )
 
 const (
-	ActionTypeTask	= "task"
-	ActionTypeCond	= "condition"
-	ActionTypeFlow	= "flow"
-	ActionTypeTimeout= "timeout"
-	BranchKeyDefault = "default"
-	BranchKeyJoiner = "_"
-	defaultBranch	= "*"
+	ActionTypeTask    = "task"
+	ActionTypeCond    = "condition"
+	ActionTypeFlow    = "flow"
+	ActionTypeTimeout = "timeout"
+	BranchKeyDefault  = "default"
+	BranchKeyJoiner   = "_"
+	defaultBranch     = "*"
 )
 
 type Workflow struct {
-	Id          int64                     `json:"id"`
-	DimensionId int64                     `json:"dimension_id"`
-	SceneId     int64                     `json:"scene_id"`
-	FlowChart  	string					  `json:"flow_chart"`
-	FlowCharts  *WorkflowChart			  `json:"flow_charts"`
-	FlowBranch  *WorkflowBranch           `json:"flow_branch"`
-	IsDefault   int                       `json:"is_default"`
-	Range1      string                    `json:"range1"`
-	Range2      string                    `json:"range2"`
-	Remark      string                    `json:"remark"`
-	UpdateTime  time.Time                 `json:"update_time"`
-	GroupName   string                    `json:"group_name"`
+	Id          int64           `json:"id"`
+	DimensionId int64           `json:"dimension_id"`
+	SceneId     int64           `json:"scene_id"`
+	FlowChart   string          `json:"flow_chart"`
+	FlowCharts  *WorkflowChart  `json:"flow_charts"`
+	FlowBranch  *WorkflowBranch `json:"flow_branch"`
+	IsDefault   int             `json:"is_default"`
+	Range1      string          `json:"range1"`
+	Range2      string          `json:"range2"`
+	Remark      string          `json:"remark"`
+	UpdateTime  time.Time       `json:"update_time"`
+	GroupName   string          `json:"group_name"`
 }
 
 type WorkflowChart struct {
-	FirstActionId	string				`json:"first_action_id"`
-	LastActionId	string				`json:"last_action_id"`
-	HashCondition	bool				`json:"has_condition"`
-	ActionMap		map[string]*Action	`json:"actions"`
+	FirstActionId string             `json:"first_action_id"`
+	LastActionId  string             `json:"last_action_id"`
+	HashCondition bool               `json:"has_condition"`
+	ActionMap     map[string]*Action `json:"actions"`
 }
 
 type Action struct {
-	ActionType		string				`json:"action_type"`
-	ActionId		string				`json:"action_id"`
-	ActionName		string				`json:"action_name"`
-	Params			[]*Param			`json:"params"`
-	NextActionIds	[]string			`json:"next_action_ids"`
-	NextConditions	[]string			`json:"next_conditions"`
-	PrevActionIds	[]string			`json:"prev_action_ids"`
-	Timeout			int64				`json:"timeout"`
-	TimeoutAsync	bool				`json:"timeout_async"`
-	TimeoutDynamic	bool				`json:"timeout_dynamic"`
-	RefWorkflowId	int64				`json:"ref_workflow_id"`
-	Description		string				`json:"description"`
+	ActionType     string   `json:"action_type"`
+	ActionId       string   `json:"action_id"`
+	ActionName     string   `json:"action_name"`
+	Params         []*Param `json:"params"`
+	NextActionIds  []string `json:"next_action_ids"`
+	NextConditions []string `json:"next_conditions"`
+	PrevActionIds  []string `json:"prev_action_ids"`
+	Timeout        int64    `json:"timeout"`
+	TimeoutAsync   bool     `json:"timeout_async"`
+	TimeoutDynamic bool     `json:"timeout_dynamic"`
+	RefWorkflowId  int64    `json:"ref_workflow_id"`
+	Description    string   `json:"description"`
 }
 
 type Param struct {
-	Name			string				`json:"name"`
-	Value			string				`json:"value"`
-	Type			string				`json:"type"`
+	Name  string `json:"name"`
+	Value string `json:"value"`
+	Type  string `json:"type"`
 }
 
 type WorkflowBranch struct {
@@ -87,25 +88,25 @@ func NewWorkflowChart(flowChartStr string) (*WorkflowChart, error) {
 	if len(flowChartStr) == 0 {
 		return nil, errors.New("create WorkflowChart fail, flowChartStr is empty")
 	}
-	
+
 	flowChart := &WorkflowChart{}
-    //读取的数据为json格式，需要进行解码
-    err := json.Unmarshal([]byte(flowChartStr), flowChart)
-    if err != nil {
-        return nil, fmt.Errorf("create WorkflowChart fail, invalid json:%v, err:%v", flowChartStr, err)
-    }
-    
-    err = flowChart.setFirstActionId()
-    if err != nil {
-    	return nil, fmt.Errorf("create WorkflowChart fail, err:%v", err)
-    }
+	//读取的数据为json格式，需要进行解码
+	err := json.Unmarshal([]byte(flowChartStr), flowChart)
+	if err != nil {
+		return nil, fmt.Errorf("create WorkflowChart fail, invalid json:%v, err:%v", flowChartStr, err)
+	}
+
+	err = flowChart.setFirstActionId()
+	if err != nil {
+		return nil, fmt.Errorf("create WorkflowChart fail, err:%v", err)
+	}
 
 	flowChart.setPrevActionIds(flowChart.FirstActionId)
 
-    return flowChart, nil
+	return flowChart, nil
 }
 
-func (w *WorkflowChart) setPrevActionIds(actionId string){
+func (w *WorkflowChart) setPrevActionIds(actionId string) {
 	action, ok := w.ActionMap[actionId]
 	if !ok {
 		return
@@ -114,7 +115,7 @@ func (w *WorkflowChart) setPrevActionIds(actionId string){
 	if actionId == w.FirstActionId {
 		action.PrevActionIds = []string{}
 	}
-	
+
 	nextActionIds := action.NextActionIds
 	for _, nextActionId := range nextActionIds {
 		nextAction, ok := w.ActionMap[nextActionId]
@@ -122,10 +123,10 @@ func (w *WorkflowChart) setPrevActionIds(actionId string){
 			//报个error？
 			continue
 		}
-		
+
 		if nextAction.PrevActionIds == nil || len(nextAction.PrevActionIds) == 0 {
 			nextAction.PrevActionIds = []string{actionId}
-		}else{
+		} else {
 			isAlreadyAdd := false
 			var prevActionId string
 			for _, prevActionId = range nextAction.PrevActionIds {
@@ -138,13 +139,13 @@ func (w *WorkflowChart) setPrevActionIds(actionId string){
 				nextAction.PrevActionIds = append(nextAction.PrevActionIds, actionId)
 			}
 		}
-		
+
 		w.setPrevActionIds(nextActionId)
 	}
 }
 
 /*
-	耗时搜索
+耗时搜索
 */
 func (w *WorkflowChart) setFirstActionId() error {
 	nextActionIds := make(map[string]bool)
@@ -153,46 +154,46 @@ func (w *WorkflowChart) setFirstActionId() error {
 			w.LastActionId = action.ActionId
 			continue
 		}
-		
+
 		for _, nextId := range action.NextActionIds {
 			nextActionIds[nextId] = true
 		}
 	}
-	
-	for actionId,_ := range w.ActionMap {
+
+	for actionId, _ := range w.ActionMap {
 		if _, ok := nextActionIds[actionId]; !ok {
 			w.FirstActionId = actionId
 			return nil
 		}
 	}
-	
+
 	return errors.New("first action not found")
 }
 
 func (w *WorkflowChart) CreateWaitMap() (map[string]*sync.WaitGroup, map[string]*TimeWaiter) {
-	wgMap:= make(map[string]*sync.WaitGroup)
-	tsMap:= make(map[string]*TimeWaiter)
+	wgMap := make(map[string]*sync.WaitGroup)
+	tsMap := make(map[string]*TimeWaiter)
 	for actionId, action := range w.ActionMap {
 		prevCount := len(action.PrevActionIds)
-		if prevCount >1 {
+		if prevCount > 1 {
 			wg := &sync.WaitGroup{}
 			wg.Add(prevCount)
-			wgMap[actionId]= wg
+			wgMap[actionId] = wg
 		}
 
 		if action.Timeout > 0 {
 			tsMap[actionId] = NewTimeWaiter(action.Timeout)
 		}
 	}
-	
-	return wgMap,tsMap
+
+	return wgMap, tsMap
 }
 
 func (p *Param) clone() *Param {
 	return &Param{
-		Name:	p.Name,
-		Value:	p.Value,
-		Type:	p.Type,
+		Name:  p.Name,
+		Value: p.Value,
+		Type:  p.Type,
 	}
 }
 
@@ -206,7 +207,7 @@ func (a *Action) createParamSlice(paramValues *sync.Map) ([]interface{}, error) 
 	for idx, param := range a.Params {
 		//获取实际值
 		str := param.Value
-		if strings.HasPrefix(param.Value,"$") {
+		if strings.HasPrefix(param.Value, "$") {
 			paramValue, _ := paramValues.Load(str[1:])
 			str = fmt.Sprintf("%v", paramValue)
 		}
@@ -214,33 +215,33 @@ func (a *Action) createParamSlice(paramValues *sync.Map) ([]interface{}, error) 
 		//获取参数
 		if param.Type == "string" {
 			p[idx] = str
-		}else if param.Type == "int" {
+		} else if param.Type == "int" {
 			val, err := strconv.ParseInt(str, 10, 64)
 			if err != nil {
 				return nil, err
 			}
 			p[idx] = val
-		}else if param.Type == "float" {
+		} else if param.Type == "float" {
 			val, err := strconv.ParseFloat(str, 64)
 			if err != nil {
 				return nil, err
 			}
 			p[idx] = val
-		}else if param.Type == "bool" {
+		} else if param.Type == "bool" {
 			var val bool
 			strl := strings.ToLower(str)
 			if strl == "true" {
 				val = true
-			}else if strl == "false" {
+			} else if strl == "false" {
 				val = false
-			}else {
+			} else {
 				return nil, fmt.Errorf("invalid bool value, it must be: true or false")
 			}
 			p[idx] = val
-		}else if param.Type == "interface" {
+		} else if param.Type == "interface" {
 			var val interface{} = str
 			p[idx] = val
-		}else{
+		} else {
 			//TODO ZYF 先暂时支持4种最常见的类型
 			return nil, fmt.Errorf("unknown param type:%v", param.Type)
 		}
@@ -250,30 +251,45 @@ func (a *Action) createParamSlice(paramValues *sync.Map) ([]interface{}, error) 
 }
 
 func (a *Action) Detach(prevAction *Action) {
-	if prevAction == nil {
+	//fmt.Println("\nstart detach, prevActionId, actionId:", prevAction.ActionId, a.ActionId)
+	if prevAction == nil || len(a.PrevActionIds) == 0 {
 		//todo error
 		return
 	}
 
-	pActionIds := make([]string, len(a.PrevActionIds)-1)
-	previ := 0
-	for _, prevActionId := range a.PrevActionIds {
-		if prevActionId != prevAction.ActionId {
-			pActionIds[previ] = prevActionId
-			previ++
+	prevId := -1
+	for pId, prevActionId := range a.PrevActionIds {
+		if prevActionId == prevAction.ActionId {
+			prevId = pId
+			break
 		}
 	}
-	a.PrevActionIds = pActionIds
+	if prevId > -1 {
+		a.PrevActionIds = append(a.PrevActionIds[:prevId], a.PrevActionIds[prevId+1:]...)
+	}
 
-	nActionIds := make([]string, len(prevAction.NextActionIds)-1)
-	nexti := 0
-	for _, nextActionId := range prevAction.NextActionIds {
-		if nextActionId != a.ActionId {
-			nActionIds[nexti] = nextActionId
-			nexti++
+	nextId := -1
+	for nId, nextActionId := range prevAction.NextActionIds {
+		if nextActionId == a.ActionId {
+			nextId = nId
+			break
 		}
 	}
-	prevAction.NextActionIds = nActionIds
+	//fmt.Println("nextId============>", nextId)
+	//fmt.Println("before set prevAction.NextActionIds===>", strings.Join(prevAction.NextActionIds,","))
+	if nextId > -1 {
+		prevAction.NextActionIds = append(prevAction.NextActionIds[:nextId], prevAction.NextActionIds[nextId+1:]...)
+		//fmt.Println("after set prevAction.NextActionIds===>", strings.Join(prevAction.NextActionIds,","))
+		if len(prevAction.NextConditions) > nextId {
+			prevAction.NextConditions = append(prevAction.NextConditions[:nextId], prevAction.NextConditions[nextId+1:]...)
+		}
+		//fmt.Println("after set prevAction.NextConditions===>", strings.Join(prevAction.NextConditions,","))
+	}
+	//fmt.Println("\nfinish detach, prevActionId, actionId:", prevAction.ActionId, a.ActionId)
+}
+
+func (a *Action) toString() string {
+	return fmt.Sprintf("actionId:%+v, nextActionIds:%+v, nextConditions:%+v, prevActionIds:%+v", a.ActionId, strings.Join(a.NextActionIds, ","), strings.Join(a.NextConditions, ","))
 }
 
 func (a *Action) clone() *Action {
@@ -285,19 +301,19 @@ func (a *Action) clone() *Action {
 		}
 	}
 
-	act:= &Action{
-		ActionType:		a.ActionType,
-		ActionId:		a.ActionId,
-		ActionName:		a.ActionName,
-		Params: 		params,
-		NextActionIds:	copyStringArray(a.NextActionIds),
-		NextConditions:	copyStringArray(a.NextConditions),
-		PrevActionIds:	copyStringArray(a.PrevActionIds),
-		Timeout: 		a.Timeout,
+	act := &Action{
+		ActionType:     a.ActionType,
+		ActionId:       a.ActionId,
+		ActionName:     a.ActionName,
+		Params:         params,
+		NextActionIds:  copyStringArray(a.NextActionIds),
+		NextConditions: copyStringArray(a.NextConditions),
+		PrevActionIds:  copyStringArray(a.PrevActionIds),
+		Timeout:        a.Timeout,
 		TimeoutAsync:   a.TimeoutAsync,
 		TimeoutDynamic: a.TimeoutDynamic,
 		RefWorkflowId:  a.RefWorkflowId,
-		Description:	a.Description,
+		Description:    a.Description,
 	}
 	return act
 }
@@ -305,7 +321,8 @@ func (a *Action) clone() *Action {
 func (w *WorkflowChart) clone() *WorkflowChart {
 	chart := &WorkflowChart{}
 	chart.FirstActionId = w.FirstActionId
-	chart.LastActionId  = w.LastActionId
+	chart.LastActionId = w.LastActionId
+	chart.HashCondition = w.HashCondition
 
 	actionMap := make(map[string]*Action)
 	for actionId, action := range w.ActionMap {
@@ -321,7 +338,7 @@ func copyStringArray(sources []string) []string {
 		return nil
 	}
 
-	dests:=make([]string, len(sources))
+	dests := make([]string, len(sources))
 	for i, source := range sources {
 		dests[i] = source
 	}
@@ -329,6 +346,7 @@ func copyStringArray(sources []string) []string {
 }
 
 func (a *Action) executeCond(paramValues *sync.Map) (retActionId string, err error) {
+	//fmt.Println("\n\n\n开始执行executeCond:",fmt.Sprintf("action:%+v", a))
 	//若报错，有缺省用缺省,无缺省用最后一个。条件必含后继，配置保存时校验
 	defaultIndex := len(a.NextActionIds) - 1
 	for idx, cdt := range a.NextConditions {
@@ -336,36 +354,47 @@ func (a *Action) executeCond(paramValues *sync.Map) (retActionId string, err err
 			defaultIndex = idx
 		}
 	}
+	//fmt.Println("defaultIndex=======>", defaultIndex)
 
 	retActionId = a.NextActionIds[defaultIndex]
+	//fmt.Println("retActionId=>", retActionId)
 	err = nil
 	defer func() {
 		if err0 := recover(); err0 != nil {
 			err = fmt.Errorf("executeCond error, default value: %v used, a.Params:%v, paramValues:%v, err0:%v", a.NextActionIds[defaultIndex], a.Params, paramValues, err0)
 		}
 	}()
-
+	//fmt.Println("\nexecuteCond start:", a.ActionId, a.ActionName, "\n")
+	//fmt.Println(fmt.Sprintf("\nparamValues:%+v", paramValues))
 	params, err := a.createParamSlice(paramValues)
+	//fmt.Println(fmt.Sprintf("\n获取到的参数值params:%+v", params), "err===>", err)
 	if err != nil {
 		err = fmt.Errorf("createParamSlice error, default value: %v used, a.Params:%v, paramValues:%v, err:%v", a.NextActionIds[defaultIndex], a.Params, paramValues, err)
+		//fmt.Println("\nerr==========>", err)
 		return
 	}
-
+	//fmt.Println("prepare to exe:", a.ActionName, params)
 	val, err := GetCondExecutors().Execute(a.ActionName, params)
+	//fmt.Println("条件执行结果 result: val====>", val, "err====>", err)
 	if err != nil {
 		err = fmt.Errorf("GetCondExecutors().Execute error, default value: %v used, actionName:%v, params:%v, err:%v", a.NextActionIds[defaultIndex], a.ActionName, params, err)
 		return
 	}
 
+	//fmt.Println("遍历比较,a和val ===>a=", fmt.Sprintf("%+v", a), "val=", val)
 	for idx, cdt := range a.NextConditions {
+		//fmt.Println("cdt===",cdt, " val===", val)
 		if cdt == val {
 			retActionId = a.NextActionIds[idx]
 			err = nil
+			//fmt.Println("retActionId===>", retActionId)
 			return
 		}
 	}
 
 	err = fmt.Errorf("no matched value error, default value:%v used, a.ActionId:%v, execute result:%v, nextActionIds:%v", a.NextActionIds[defaultIndex], a.ActionId, val, a.NextConditions)
+	//fmt.Println("eeeeeeeeeeeeeerrrrrrrrrrrrr====>", err)
+	//fmt.Println("\n\n\nexecuteCond end\n\n", a.ActionId, a.ActionName, "\n\n")
 	return
 }
 
@@ -413,7 +442,7 @@ func (w *WorkflowBranch) getCurrentBranchKey() string {
 }
 
 func (w *WorkflowBranch) getBranchKey(branchMap map[string]int) string {
-	if len(w.SortedBranch) ==0 || len(branchMap) == 0 {
+	if len(w.SortedBranch) == 0 || len(branchMap) == 0 {
 		return BranchKeyDefault
 	}
 
@@ -437,7 +466,7 @@ func (w *WorkflowBranch) currentIndex(actionId string) int {
 }
 
 func (w *WorkflowBranch) hasBranch() bool {
-	if w.SortedBranch == nil || len(w.SortedBranch) ==0 {
+	if w.SortedBranch == nil || len(w.SortedBranch) == 0 {
 		return false
 	}
 
@@ -451,7 +480,7 @@ func (w *WorkflowBranch) nextStep() bool {
 			return true
 		}
 
-		for i:=0;i<=idx;i++ {
+		for i := 0; i <= idx; i++ {
 			branchId := w.SortedBranch[i]
 			w.CurrentBranch[branchId] = 0
 		}

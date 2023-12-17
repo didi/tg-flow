@@ -1,4 +1,5 @@
-/**
+/*
+*
 Description : workflow engine v3.1
 Author		: dayunzhangyunfeng@didiglobal.com
 Date		: 2021-05-14
@@ -25,37 +26,13 @@ const (
 type WorkflowEngine struct {
 	sceneModuleMap map[int64]*SceneModule `json:"scene_module_map"`
 	workflowMap    map[int64]*Workflow    `json:"workflows"`
-	modelBaseMap   map[string]IModelBase   `json:"modules"`
+	modelBaseMap   map[string]IModelBase  `json:"modules"`
 	updateTime     string                 `json:"update_time"`
 	condExecutors  *CondExecutors         `json:"cond_executors"`
 }
 
-func NewWorkflowEngine(moduleObj ModuleObjBase, appId int64) (*WorkflowEngine, error) {
-	//更新系统下全部场景的节点对象
-	smMap, err := LoadSceneModuleMap(appId)
-	if err != nil {
-		return nil, err
-	}
-
-	//load workflow
-	wfMap, err := LoadWorkflow(appId, smMap)
-	if err != nil {
-		return nil, err
-	}
-
-	//TODO ZYF err
-	resetWorkflows(wfMap)
-
-	mbMap, err := createModelMap(moduleObj, wfMap)
-	if err != nil {
-		return nil, err
-	}
-
-	workfowEngine := newWorkflowEngine(smMap, wfMap, mbMap)
-	return workfowEngine, nil
-}
-
 func resetWorkflows(wfMap map[int64]*Workflow) {
+	//fmt.Println("wfMap.len=", len(wfMap))
 	if len(wfMap) == 0 {
 		return
 	}
@@ -73,22 +50,23 @@ func resetWorkflow(wfMap map[int64]*Workflow, workflow *Workflow) error {
 	if workflow == nil {
 		return errors.New("workflow is nil:%v")
 	}
-
+	//fmt.Println("开始for循环处理flowAction")
 	for {
 		flowActionMap := make(map[string]*Action)
+		//fmt.Println("workflow.FlowCharts.ActionMap.len===>", len(workflow.FlowCharts.ActionMap), workflow.FlowCharts.HashCondition)
 		for _, action := range workflow.FlowCharts.ActionMap {
 			if action.ActionType == ActionTypeFlow {
 				if action.RefWorkflowId <= 0 {
 					tlog.ErrorCount(context.TODO(), "resetWorkflow_err", fmt.Sprintf("ref_workflow_id must >0, flowAction.Action=%+v", action))
-                    continue
+					continue
 				}
 				flowActionMap[action.ActionId] = action
 			}
 		}
 		if len(flowActionMap) < 1 {
-			return nil
+			break
 		}
-
+		//fmt.Println()
 		//对所有flowAction
 		for _, flowAction := range flowActionMap {
 			//get workflowid
@@ -108,13 +86,13 @@ func resetWorkflow(wfMap map[int64]*Workflow, workflow *Workflow) error {
 			firstActionId := refWf.FlowCharts.FirstActionId
 			if flowAction.ActionId == workflow.FlowCharts.FirstActionId {
 				workflow.FlowCharts.FirstActionId = firstActionId
-			}else {
+			} else {
 				for _, prevId := range flowAction.PrevActionIds {
 					strNextActionIds := strings.Join(workflow.FlowCharts.ActionMap[prevId].NextActionIds, ",")
 					strNewNextActionIds := ""
-					if flowAction.Timeout >0 {
+					if flowAction.Timeout > 0 {
 						strNewNextActionIds = strNextActionIds + "," + firstActionId
-					}else {
+					} else {
 						strNewNextActionIds = strings.ReplaceAll(strNextActionIds, flowAction.ActionId, firstActionId)
 					}
 					workflow.FlowCharts.ActionMap[prevId].NextActionIds = strings.Split(strNewNextActionIds, ",")
@@ -128,7 +106,7 @@ func resetWorkflow(wfMap map[int64]*Workflow, workflow *Workflow) error {
 			lastActionId := refWf.FlowCharts.LastActionId
 			if flowAction.ActionId == workflow.FlowCharts.LastActionId {
 				workflow.FlowCharts.LastActionId = lastActionId
-			}else {
+			} else {
 				for _, nextId := range flowAction.NextActionIds {
 					strPrevActionIds := strings.Join(workflow.FlowCharts.ActionMap[nextId].PrevActionIds, ",")
 					strNewPrevActionIds := ""
@@ -146,68 +124,33 @@ func resetWorkflow(wfMap map[int64]*Workflow, workflow *Workflow) error {
 			//删除
 			if flowAction.Timeout > 0 {
 				flowAction.ActionType = ActionTypeTimeout
-			}else{
+			} else {
 				delete(workflow.FlowCharts.ActionMap, flowAction.ActionId)
 			}
 		}
 	}
 
+	//fmt.Println("before workflow.FlowCharts.HashCondition=>", workflow.FlowCharts.HashCondition)
 	for _, action := range workflow.FlowCharts.ActionMap {
+		//fmt.Println("actionId=", action.ActionId, "action.ActionType=", action.ActionType)
 		if action.ActionType == ActionTypeCond {
 			workflow.FlowCharts.HashCondition = true
 			break
 		}
+
 	}
+	//fmt.Println("after  workflow.FlowCharts.HashCondition, workflowId=",workflow.Id, "hasCondition=",workflow.FlowCharts.HashCondition)
 	return nil
 }
 
-func NewWorkflowEngineFromFile(moduleObj ModuleObjBase, configPath string) (*WorkflowEngine, error) {
-	smMap, err := LoadSceneModuleMapFromFile(configPath + "/scene.json")
-	if err != nil {
-		return nil, err
-	}
-
-	//更新workflow
-	wfMap, err := LoadWorkflowFromFile(configPath, smMap)
-	if err != nil {
-		return nil, err
-	}
-
-	resetWorkflows(wfMap)
-
-	mbMap, err := createModelMap(moduleObj, wfMap)
-	if err != nil {
-		return nil, err
-	}
-
-	workfowEngine := newWorkflowEngine(smMap, wfMap, mbMap)
-	return workfowEngine, nil
-}
-
-func NewWorkflowEngineFromApollo(moduleObj ModuleObjBase, namespace,  configName string) (*WorkflowEngine, error) {
-	smMap, wfMap, err := LoadSceneModuleWorkflowFromApollo(namespace, configName)
-	if err != nil {
-		return nil, err
-	}
-	resetWorkflows(wfMap)
-
-	mbMap, err := createModelMap(moduleObj, wfMap)
-	if err != nil {
-		return nil, err
-	}
-
-	workfowEngine := newWorkflowEngine(smMap, wfMap, mbMap)
-	return workfowEngine, nil
-}
-
-func newWorkflowEngine(sceneModuleMap map[int64]*SceneModule, workflowMap map[int64]*Workflow, modelBaseMap map[string]IModelBase) *WorkflowEngine {
-	ut := fmt.Sprintf("%v", time.Now().Format("2006-01-02 15:04:05"))
+func newWorkflowEngine(sceneModuleMap map[int64]*SceneModule, workflowMap map[int64]*Workflow, modelBaseMap map[string]IModelBase, version string) *WorkflowEngine {
+	//ut := fmt.Sprintf("%v", time.Now().Format("2006-01-02 15:04:05"))
 	cExecutors := GetCondExecutors()
 	wfe := &WorkflowEngine{
 		sceneModuleMap: sceneModuleMap,
 		workflowMap:    workflowMap,
 		modelBaseMap:   modelBaseMap,
-		updateTime:     ut,
+		updateTime:     version,
 		condExecutors:  cExecutors,
 	}
 
@@ -256,18 +199,25 @@ func createModelBase(moduleObj ModuleObjBase, action *Action) (IModelBase, error
 			vMap[param.Name] = param.Value
 		}
 	}
-	vMap["Name"] = action.ActionName
+	//vMap["Name"] = action.ActionName
 	mb := moduleObj.NewObj(action.ActionName, vMap)
 	if mb == nil {
 		return mb, fmt.Errorf("create ModelBase instance error, action:%v, vMap:%v", action, vMap)
 	}
 
+	mb.SetName(action.ActionName)
+	err := reflectModuleField(mb, vMap)
+	if err != nil {
+		tlog.ErrorCount(context.TODO(), "createModelBase_err", fmt.Sprintf("set module field fail, actionName:%v, vMap:%v, error:%v", action.ActionName, vMap, err))
+	}
+
 	return mb, nil
 }
 
-func (w *WorkflowEngine) GetUpdateTime() string {
+func (w *WorkflowEngine) GetVersion() string {
 	return w.updateTime
 }
+
 func (w *WorkflowEngine) RegisterCondExecutor(conditionName string, executor interface{}) {
 	w.condExecutors.RegisterCondExecutor(conditionName, executor)
 }
@@ -286,13 +236,15 @@ func (w *WorkflowEngine) Run(ctx context.Context, sc *model.StrategyContext) {
 		return
 	}
 
+	//fmt.Println(fmt.Sprintf("准备Run,先获取图,flow=%+v", flow.FlowCharts))
 	flowChart := flow.GetWorkflowChart()
+	//fmt.Println(fmt.Sprintf("准备Run,先获取图,flowChart=%+v", flowChart))
 	if flowChart == nil {
 		sc.SetError(action0, errors.New("flowChart is nil"))
 		return
 	}
 
-	wgMap,tsMap := flowChart.CreateWaitMap()
+	wgMap, tsMap := flowChart.CreateWaitMap()
 
 	waitedMap := &sync.Map{}
 	wgn := &sync.WaitGroup{}
@@ -344,15 +296,21 @@ func (w *WorkflowEngine) selectWorkFlow(ctx context.Context, sc *model.StrategyC
 	return flow, err
 }
 
-/**
+/*
+*
+
 	新版本（v1.2.11）后因为有动态条件节点，原流程执行模式有较大变化，不再包含预处理，需实时判断节点走向和执行、跳过节点等操作。
-**/
-func (w *WorkflowEngine) doExecuteModule(ctx context.Context, sc *model.StrategyContext, flowChart  *WorkflowChart, skipedActionIdPairs *sync.Map, wgMap map[string]*sync.WaitGroup, tsMap map[string]*TimeWaiter, waitedMap *sync.Map, actionId string, wgn *sync.WaitGroup) {
+
+*
+*/
+func (w *WorkflowEngine) doExecuteModule(ctx context.Context, sc *model.StrategyContext, flowChart *WorkflowChart, skipedActionIdPairs *sync.Map, wgMap map[string]*sync.WaitGroup, tsMap map[string]*TimeWaiter, waitedMap *sync.Map, actionId string, wgn *sync.WaitGroup) {
 	action, ok := flowChart.ActionMap[actionId]
+	//fmt.Println("开始执行actionId===>", fmt.Sprintf("%+v",action), ok)
 	if !ok {
 		return
 	}
 
+	//fmt.Println("action.PrevActionIds===>", strings.Join(action.PrevActionIds, ","))
 	//is merge
 	if len(action.PrevActionIds) > 1 {
 		_, ok := waitedMap.LoadOrStore(action.ActionId, true)
@@ -370,7 +328,7 @@ func (w *WorkflowEngine) doExecuteModule(ctx context.Context, sc *model.Strategy
 
 		if timeoutActionId == "" {
 			wgMap[action.ActionId].Wait()
-		}else {
+		} else {
 			go func() {
 				wgMap[action.ActionId].Wait()
 				if tsMap[timeoutActionId] != nil {
@@ -382,7 +340,7 @@ func (w *WorkflowEngine) doExecuteModule(ctx context.Context, sc *model.Strategy
 				if mb, _ := w.modelBaseMap[timeoutActionId]; mb != nil {
 					if flowChart.ActionMap[timeoutActionId].TimeoutAsync {
 						go mb.OnTimeout(ctx, sc)
-					}else{
+					} else {
 						mb.OnTimeout(ctx, sc)
 					}
 				}
@@ -412,13 +370,13 @@ func (w *WorkflowEngine) doExecuteModule(ctx context.Context, sc *model.Strategy
 
 }
 
-func (w *WorkflowEngine) skipBranch(flowChart *WorkflowChart, wgMap map[string]*sync.WaitGroup, skipedActionIdPairs *sync.Map, toExcludeActionId string, prevAction *Action, action *Action){
+func (w *WorkflowEngine) skipBranch(flowChart *WorkflowChart, wgMap map[string]*sync.WaitGroup, skipedActionIdPairs *sync.Map, toExcludeActionId string, prevAction *Action, action *Action) {
 	if prevAction == nil || action == nil {
 		return
 	}
 
-	if len(action.PrevActionIds)>1 {
-		if _, ok := skipedActionIdPairs.LoadOrStore(prevAction.ActionId + "_" + action.ActionId, ""); !ok {
+	if len(action.PrevActionIds) > 1 {
+		if _, ok := skipedActionIdPairs.LoadOrStore(prevAction.ActionId+"_"+action.ActionId, ""); !ok {
 			wgMap[action.ActionId].Done()
 		}
 	}
@@ -429,13 +387,15 @@ func (w *WorkflowEngine) skipBranch(flowChart *WorkflowChart, wgMap map[string]*
 		return
 	}
 
-	for _, nextActionId := range action.NextActionIds {
+	nextCount := len(action.NextActionIds)
+	for i := nextCount - 1; i >= 0; i-- {
+		nextActionId := action.NextActionIds[i]
 		nextAction := flowChart.ActionMap[nextActionId]
 		w.skipBranch(flowChart, wgMap, skipedActionIdPairs, toExcludeActionId, action, nextAction)
 	}
 }
 
-func (w *WorkflowEngine) executeModule(ctx context.Context, sc *model.StrategyContext, flowChart  *WorkflowChart, action *Action, skipedActionIdPairs *sync.Map, wgMap map[string]*sync.WaitGroup, tsMap map[string]*TimeWaiter, wgn *sync.WaitGroup) string {
+func (w *WorkflowEngine) executeModule(ctx context.Context, sc *model.StrategyContext, flowChart *WorkflowChart, action *Action, skipedActionIdPairs *sync.Map, wgMap map[string]*sync.WaitGroup, tsMap map[string]*TimeWaiter, wgn *sync.WaitGroup) string {
 	toExeActionId := ""
 
 	defer func() {
@@ -445,30 +405,33 @@ func (w *WorkflowEngine) executeModule(ctx context.Context, sc *model.StrategyCo
 			sc.Skip(ErrNoUnknown, fmt.Sprintf("executeModule_err, actionId=%+v, err=%+v", action.ActionId, err))
 		}
 
-		for _, nextActionId := range action.NextActionIds {
+		nextCount := len(action.NextActionIds)
+		for i := nextCount - 1; i >= 0; i-- {
+			nextActionId := action.NextActionIds[i]
 			nextAction, ok := flowChart.ActionMap[nextActionId]
 			if !ok {
 				continue
 			}
 
 			if action.ActionType == ActionTypeCond {
-				//condition
 				if nextActionId != toExeActionId {
 					w.skipBranch(flowChart, wgMap, skipedActionIdPairs, toExeActionId, action, nextAction)
 				}
-			}else{
-				//task
-				if len(nextAction.PrevActionIds) > 1 {
+			}
+
+			if len(nextAction.PrevActionIds) > 1 {
+				if _, ok := skipedActionIdPairs.LoadOrStore(action.ActionId+"_"+nextActionId, ""); !ok {
 					wgMap[nextActionId].Done()
 				}
 			}
+
 		}
 
 		if action.ActionId == flowChart.LastActionId {
 			wgn.Done()
 		}
 
-		//fmt.Println(fmt.Sprintf("====>Finish time=%v ,actionId=%v, actionName=%v", time.Now().Format("2006-01-02 15:04:05.000"), action.ActionId, action.ActionName))
+		//fmt.Println(fmt.Sprintf("====>Finish time=%v ,actionId=%v, actionName=%v, action=%+v", time.Now().Format("2006-01-02 15:04:05.000"), action.ActionId, action.ActionName,action))
 	}()
 
 	if action == nil {
@@ -488,10 +451,9 @@ func (w *WorkflowEngine) executeModule(ctx context.Context, sc *model.StrategyCo
 	if moduleBase, ok := w.modelBaseMap[action.ActionId]; ok {
 		if !sc.IsSkip() {
 			startTime := time.Now().UnixNano() / 1e6
-			var result interface{}
-			if action.Timeout>0 && action.ActionType != ActionTypeTimeout {
+			if action.Timeout > 0 && action.ActionType != ActionTypeTimeout {
 				go func() {
-					result = moduleBase.DoAction(ctx, sc)
+					moduleBase.DoAction(ctx, sc)
 					if tsMap[action.ActionId] != nil {
 						tsMap[action.ActionId].Done()
 					}
@@ -500,10 +462,10 @@ func (w *WorkflowEngine) executeModule(ctx context.Context, sc *model.StrategyCo
 					sc.AddTimeoutAction(action.ActionName)
 					if action.TimeoutAsync {
 						go moduleBase.OnTimeout(ctx, sc)
-					}else{
+					} else {
 						moduleBase.OnTimeout(ctx, sc)
 					}
-				}else{
+				} else {
 					if action.TimeoutDynamic {
 						for _, nextActionId := range action.NextActionIds {
 							if ts, ok := tsMap[nextActionId]; ok {
@@ -513,12 +475,13 @@ func (w *WorkflowEngine) executeModule(ctx context.Context, sc *model.StrategyCo
 						}
 					}
 				}
-			}else{
-				result = moduleBase.DoAction(ctx, sc)
+			} else {
+				moduleBase.DoAction(ctx, sc)
 			}
 
 			endTime := time.Now().UnixNano() / 1e6
-			sc.SetModuleResult(action.ActionId, action.ActionName, endTime-startTime, result)
+			sc.SetModuleResult(action.ActionId, action.ActionName, endTime-startTime)
+
 		}
 	} else {
 		sc.SetError(action.ActionId, fmt.Errorf("module not found in map, moduleMap:%v, moduleName:%v", w.modelBaseMap, action.ActionName))
@@ -527,4 +490,3 @@ func (w *WorkflowEngine) executeModule(ctx context.Context, sc *model.StrategyCo
 
 	return ""
 }
-

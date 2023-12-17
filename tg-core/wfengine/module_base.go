@@ -1,7 +1,7 @@
 /**
-	Description : ModelBase interface define
-	Author		: dayunzhangyunfeng@didiglobal.com
-	Date		: 2021-05-14
+Description : ModelBase interface define
+Author		: dayunzhangyunfeng@didiglobal.com
+Date		: 2021-05-14
 */
 
 package wfengine
@@ -15,7 +15,7 @@ import (
 	"strconv"
 )
 
-type IModelBase interface{
+type IModelBase interface {
 	DoAction(context.Context, *model.StrategyContext) interface{}
 	OnTimeout(context.Context, *model.StrategyContext)
 	SetName(string)
@@ -24,10 +24,10 @@ type IModelBase interface{
 
 type ModelBase struct {
 	IModelBase
-	Name	string
+	Name string
 }
 
-func (m *ModelBase) DoAction(context.Context, *model.StrategyContext) interface{}{
+func (m *ModelBase) DoAction(context.Context, *model.StrategyContext) interface{} {
 	return nil
 }
 
@@ -47,21 +47,26 @@ type ModuleObjBase interface {
 	NewObj(moduleName string, vMap map[string]string) IModelBase
 }
 
-func ReflectModuleField(obj interface{}, reflectType reflect.Type, vMap map[string]string) error {
+func reflectModuleField(obj interface{}, vMap map[string]string) error {
+	if len(vMap) == 0 {
+		return nil
+	}
+
 	v := reflect.ValueOf(obj)
 	if v.Kind() == reflect.Ptr && !v.Elem().CanSet() {
 		err := fmt.Errorf("this obj is not match reflect")
-		tlog.ErrorCount(context.TODO(),"ReflectModuleField_err", fmt.Sprintf("obj:%v, err:%v", obj, err))
+		tlog.ErrorCount(context.TODO(), "ReflectModuleField_err", fmt.Sprintf("obj:%v, err:%v", obj, err))
 		return err
 	}
 
+	reflectType := reflect.Indirect(v).Type()
 	v = v.Elem()
 	for i := 0; i < reflectType.NumField(); i++ {
 		field := reflectType.Field(i)
 		fieldValue := v.FieldByName(field.Name)
 		if !fieldValue.IsValid() {
 			err := fmt.Errorf("this obj(" + fmt.Sprintf("%v", obj) + ") field(" + field.Name + ")")
-			tlog.ErrorCount(context.TODO(),"ReflectModuleField_err", fmt.Sprintf("%v", err))
+			tlog.ErrorCount(context.TODO(), "ReflectModuleField_err", fmt.Sprintf("%v", err))
 			continue
 		}
 
@@ -76,7 +81,7 @@ func ReflectModuleField(obj interface{}, reflectType reflect.Type, vMap map[stri
 			tempInt, err := strconv.ParseInt(vMap[field.Name], 10, 64)
 			if err != nil {
 				err := fmt.Errorf("obj(" + fmt.Sprintf("%v", obj) + ") field(" + field.Name + ")'s value(" + vMap[field.Name] + ")")
-				tlog.ErrorCount(context.TODO(),"ReflectModuleField_err", fmt.Sprintf("%v", err))
+				tlog.ErrorCount(context.TODO(), "ReflectModuleField_err", fmt.Sprintf("%v", err))
 				continue
 			}
 			fieldValue.SetInt(tempInt)
@@ -85,7 +90,7 @@ func ReflectModuleField(obj interface{}, reflectType reflect.Type, vMap map[stri
 			tempFolat, err := strconv.ParseFloat(vMap[field.Name], 64)
 			if err != nil {
 				err := fmt.Errorf("obj(" + fmt.Sprintf("%v", obj) + ") field(" + field.Name + ")'s value(" + vMap[field.Name] + ")")
-				tlog.ErrorCount(context.TODO(),"ReflectModuleField_err", fmt.Sprintf("%v", err))
+				tlog.ErrorCount(context.TODO(), "ReflectModuleField_err", fmt.Sprintf("%v", err))
 				continue
 			}
 			fieldValue.SetFloat(tempFolat)

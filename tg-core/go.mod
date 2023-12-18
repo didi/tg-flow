@@ -41,7 +41,6 @@ require (
 	git.xiaojukeji.com/observe-trace/didi-open-telemetry/opentelemetry-go v1.0.0 // indirect
 	git.xiaojukeji.com/sre-ha/chaos-sdk-go v0.2.0 // indirect
 	github.com/BurntSushi/toml v1.3.2 // indirect
-	github.com/StackExchange/wmi v1.2.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/caio/go-tdigest v3.1.0+incompatible // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
@@ -60,7 +59,6 @@ require (
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/uuid v1.5.0 // indirect
 	github.com/lufia/plan9stats v0.0.0-20231016141302-07b5767bb0ed // indirect
-	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
 	github.com/matttproud/golang_protobuf_extensions/v2 v2.0.0 // indirect
 	github.com/parnurzeal/gorequest v0.2.16 // indirect
 	github.com/pkg/errors v0.9.1 // indirect

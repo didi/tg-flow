@@ -1,3 +1,4 @@
+bin/
 vendor/
 .idea/
 output/
@@ -9,4 +10,3 @@ rebuild.sh
 tg-flow
 log/
 app.conf
-tg-example/

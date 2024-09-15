@@ -1,9 +1,10 @@
 # tg-flow简介
 tg-flow是一个专注于在线高并发场景的无状态的工作流引擎，它可以在保证高性能的前提下，为在线高并发系统提供复杂的的工作流调度能力，目前tg-flow已经广泛运用于滴滴内部多个日流量数十亿的核心在线系统。
-tg-flow包括三个主要模块:
-* tg-core: tg-flow的工作流引擎核心模块，提供了对工作流的的调度执行能力。
-* tg-web: tg-flow的工作流配置管理前端页面，为用户提供工作流的创建、编辑、保存、删除、导入、导出等功能。
-* tg-service：tg-flow的工作流配置管理后台服务，为tg-web的后台API接口，同时也提供工作流配置分发的能力，可将配置分发到redis、zookeeper、文件系统（导出为文件）中。
+tg-flow包括两个主要模块:
+* 流程调度模块: tg-flow的工作流引擎核心模块，提供了对工作流的的调度执行能力。
+* 配置管理模块: 它为用户提供工作流的创建、编辑、保存、删除、导入、导出等功能，同时也提供工作流配置在线自动分发的能力，可将配置分发到redis、zookeeper、文件系统（导出为文件）中，再由流程调度模块自动更新在线配置。
+
+目前仅开源出流程调度模块，配置管理模块尚需进一步完善后开源。同时，为了便于用户快速上手，我们在github上提供了一个基于tg-flow创建的示例应用程序，下载即可运行。地址：[tg-example](https://github.com/didi/tg-example)
 
 # 我们的目标
 受限于在线高并发场景的高性能要求，传统工作流引擎很难支持在线高并发系统。 我们的目标是实现一个既能够满足在线高并发场景的性能要求，又具备传统工作流引擎各种复杂功能的工作流引擎。
@@ -28,4 +29,4 @@ tg-flow包括三个主要模块:
   参见： [user_manual](user_manual.html)
   
 # 欢迎加入
-  请联系：[张云锋](https://github.com/dayunzhangyunfeng), [周子纯](https://github.com/zhouzichun0315)， [唐桂尧](https://github.com/tgy931)
+  请联系：[张云锋](https://github.com/dayunzhangyunfeng), [周子纯](https://github.com/zhouzichun0315), [唐桂尧](https://github.com/tgy931)

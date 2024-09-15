@@ -2,12 +2,12 @@
 
 通过对本公司的 tg-flow 软件产品操作过程的描述，使用户可以自主对软件进行使用和操作。
 
+本手册第6节之前均为tg-service后台管理系统的安装部署，由于目前该系统尚在完善中，暂未开源，所以可以暂时不用过多关注。
+目前，可以先直接手工完成工作流配置文件的编写，将来tg-service开源后再通过该系统进行工作流的配置和管理。
+
 ## 2. 下载与安装
 
 ### 2.1 下载地址
-tg-flow：git clone https://github.com/didi/tg-flow
-
-tg-example：git clone https://github.com/didi/tg-example
 
 tg-service:（敬请期待）
 

@@ -2,8 +2,8 @@
 tg-flow是一个专注于在线高并发场景的工作流引擎，它综合运用了多种优化算法，可以在高并发场景下轻松地支持由100多个节点组成的复杂工作流的调度，除去业务逻辑之外引擎本身的耗时仅0.1ms左右。
 目前tg-flow已经广泛运用于滴滴内部多个日流量数十亿的核心在线高并发系统。
 tg-flow 相关的开源仓库总共将包括3个部分:
-* tg-flow: 工作流引擎核心模块，[github仓库](https://github.com/didi/tg-flow)，提供对工作流的的调度执行能力。
-* tg-example: 为了便于新用户快速上手而提供的一个示例项目：[tg-example](https://github.com/didi/tg-example)，如果您本地拥有golang环境，下载后直接go run main.go即可运行。
+* tg-flow: 工作流引擎核心模块，提供对工作流的的调度执行能力。
+* tg-example: 为了便于新用户快速上手而提供的一个示例项目，如果用户本地有安装golang环境，下载后直接go run main.go即可运行。[点此了解 tg-example](https://github.com/didi/tg-example)
 * tg-service: tg-flow的后台管理系统，为用户提供工作流的创建、编辑、保存、删除、导入、导出等功能，同时也提供工作流配置自动分发到在线服务的能力。
 * 注：用户可以不必依赖tg-service来管理工作流，可人工编辑工作流配置文件，并存入自己项目目录下，供引擎使用。后台管理系统尚需进一步完善后再开源。
 

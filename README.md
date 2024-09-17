@@ -26,7 +26,7 @@ tg-flow 相关的开源仓库总共将包括3个部分:
   3. 再进一步，如果需要使用tg-flow所有功能，可以在第二步的基础上，自行部署redis或zookeeper，然后在线系统中可以使用tg-core中的核心模块定期从redis或zookeeper中检测工作流新版本，并及时更新到在线系统。
   
 # 用户手册
-  参见： [user_manual](user_manual.html)
+  参见： [user_manual](https://github.com/didi/tg-example/blob/main/user_manual.md)
   
 # 欢迎加入
   请联系：[张云锋](https://github.com/dayunzhangyunfeng), [周子纯](https://github.com/zhouzichun0315), [唐桂尧](https://github.com/tgy931)

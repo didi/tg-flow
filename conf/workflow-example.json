@@ -1,0 +1,200 @@
+{
+	"actions": {
+		"action-10217-1": {
+			"action_type": "task",
+			"action_id": "action-10217-1",
+			"action_name": "data.DataPrepare",
+			"params": null,
+			"next_action_ids": [
+				"action-10217-2",
+				"action-10217-5",
+				"action-10217-6",
+				"action-10217-9"
+			],
+			"description": "",
+			"timeout": 0,
+			"ref_workflow_id": 0,
+			"timeout_async": false,
+			"timeout_dynamic": false,
+			"location": "84,64"
+		},
+		"action-10217-10": {
+			"action_type": "task",
+			"action_id": "action-10217-10",
+			"action_name": "rank.RoughRank",
+			"params": null,
+			"next_action_ids": [
+				"action-10217-11"
+			],
+			"description": "",
+			"timeout": 0,
+			"ref_workflow_id": 0,
+			"timeout_async": false,
+			"timeout_dynamic": false,
+			"location": "802,67"
+		},
+		"action-10217-11": {
+			"action_type": "task",
+			"action_id": "action-10217-11",
+			"action_name": "rank.PreciseRank",
+			"params": null,
+			"next_action_ids": [
+				"action-10217-12"
+			],
+			"description": "",
+			"timeout": 0,
+			"ref_workflow_id": 0,
+			"timeout_async": false,
+			"timeout_dynamic": false,
+			"location": "981,67"
+		},
+		"action-10217-12": {
+			"action_type": "task",
+			"action_id": "action-10217-12",
+			"action_name": "rank.ReRank",
+			"params": null,
+			"description": "",
+			"timeout": 0,
+			"ref_workflow_id": 0,
+			"timeout_async": false,
+			"timeout_dynamic": false,
+			"location": "1168,69"
+		},
+		"action-10217-2": {
+			"action_type": "condition",
+			"action_id": "action-10217-2",
+			"action_name": "EQ",
+			"params": [
+				{
+					"name": "isRecallHot",
+					"value": "$isRecallHot",
+					"type": "bool"
+				},
+				{
+					"name": "isRecallHot",
+					"value": "true",
+					"type": "bool"
+				}
+			],
+			"next_action_ids": [
+				"action-10217-3",
+				"action-10217-4"
+			],
+			"next_conditions": [
+				"N",
+				"Y"
+			],
+			"description": "是否召回热门",
+			"timeout": 0,
+			"ref_workflow_id": 0,
+			"timeout_async": false,
+			"timeout_dynamic": false,
+			"location": "304,-37"
+		},
+		"action-10217-3": {
+			"action_type": "task",
+			"action_id": "action-10217-3",
+			"action_name": "recall.HistRecall",
+			"params": null,
+			"next_action_ids": [
+				"action-10217-10"
+			],
+			"description": "",
+			"timeout": 50,
+			"ref_workflow_id": 0,
+			"timeout_async": false,
+			"timeout_dynamic": false,
+			"location": "441,-79"
+		},
+		"action-10217-4": {
+			"action_type": "task",
+			"action_id": "action-10217-4",
+			"action_name": "recall.HotRecall",
+			"params": null,
+			"next_action_ids": [
+				"action-10217-10"
+			],
+			"description": "",
+			"timeout": 50,
+			"ref_workflow_id": 0,
+			"timeout_async": false,
+			"timeout_dynamic": false,
+			"location": "441,-7"
+		},
+		"action-10217-5": {
+			"action_type": "task",
+			"action_id": "action-10217-5",
+			"action_name": "recall.QacRecall",
+			"params": null,
+			"next_action_ids": [
+				"action-10217-10"
+			],
+			"description": "",
+			"timeout": 50,
+			"ref_workflow_id": 0,
+			"timeout_async": false,
+			"timeout_dynamic": false,
+			"location": "441,66"
+		},
+		"action-10217-6": {
+			"action_type": "task",
+			"action_id": "action-10217-6",
+			"action_name": "recall.EsGeneral",
+			"params": null,
+			"next_action_ids": [
+				"action-10217-7"
+			],
+			"description": "",
+			"timeout": 50,
+			"ref_workflow_id": 0,
+			"timeout_async": false,
+			"timeout_dynamic": true,
+			"location": "262,214"
+		},
+		"action-10217-7": {
+			"action_type": "task",
+			"action_id": "action-10217-7",
+			"action_name": "recall.EsAoi",
+			"params": null,
+			"next_action_ids": [
+				"action-10217-8"
+			],
+			"description": "",
+			"timeout": 30,
+			"ref_workflow_id": 0,
+			"timeout_async": false,
+			"timeout_dynamic": false,
+			"location": "438,214"
+		},
+		"action-10217-8": {
+			"action_type": "task",
+			"action_id": "action-10217-8",
+			"action_name": "recall.EsPrecise",
+			"params": null,
+			"next_action_ids": [
+				"action-10217-10"
+			],
+			"description": "",
+			"timeout": 30,
+			"ref_workflow_id": 0,
+			"timeout_async": false,
+			"timeout_dynamic": false,
+			"location": "615,214"
+		},
+		"action-10217-9": {
+			"action_type": "timeout",
+			"action_id": "action-10217-9",
+			"action_name": "recall.Timeout",
+			"params": null,
+			"next_action_ids": [
+				"action-10217-10"
+			],
+			"description": "",
+			"timeout": 80,
+			"ref_workflow_id": 0,
+			"timeout_async": false,
+			"timeout_dynamic": false,
+			"location": "440,140"
+		}
+	}
+}
